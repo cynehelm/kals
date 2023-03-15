@@ -123,7 +123,7 @@ creationXinit() {
     clear
     echo "Création du fichier Xinitrc"
     touch .xinitrc
-    echo "setxkbmap fr\nexec i3" &> .xinitrc
+    echo -e "setxkbmap fr\nexec i3" &> .xinitrc
     sleep 5
 }
 #Message de fin:
