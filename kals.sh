@@ -8,13 +8,12 @@
 essentielScript() {
     echo "Préparation du script..."
     sudo pacman -Syu
-    sudo pacman -S --noconfirm --needed whiptail
-    sleep 2
+    sleep 5
 }
 #Télécharge les paquets de ma configuration:
 packageInstall() {
     if (whiptail --title "Commencer l'installation" --yesno "Êtes vous certains de vouloir procéder à l'installation de ma configuration ?" 10 80); then
-        sudo pacman -S --noconfirm --needed apparmor arc-gtk-theme archlinux-keyring autoconf automake base binutils bison boost-libs cmus debugedit dialog discord dmenu fakeroot feh ffmpeg file findutils flex gawk gcc gettext gimp gnome-multi-writer grep groff grub grub-customizer gufw gzip htop i3-wm i3lock inkscape keepassxc lf libtool linux linux-firmware m4 make man-db mariadb neofetch neovim netctl networkmanager nitrogen nm-connection-editor noto-fonts openssh os-prober otf-droid-nerd p7zip pacman pacman-contrib patch pavucontrol picom pkgconf polybar pulseaudio python-packaging scour scrot sed sudo texinfo thunderbird udisks2 ufw which wireless_tools xfce4-settings xorg-server xorg-xbacklight xorg-xinit youtube-dl zram-generator zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting
+        sudo pacman -S --noconfirm --needed apparmor arc-gtk-theme archlinux-keyring autoconf automake base binutils bison boost-libs cmus debugedit dialog discord dmenu fakeroot feh ffmpeg file findutils flex gawk gcc gettext gimp gnome-multi-writer grep groff grub grub-customizer gufw gzip htop i3-wm i3lock inkscape keepassxc lf libtool linux linux-firmware m4 make man-db mariadb neofetch neovim netctl networkmanager nitrogen nm-connection-editor noto-fonts openssh os-prober otf-droid-nerd p7zip pacman pacman-contrib patch pavucontrol picom pkgconf polybar pulseaudio python-packaging scour scrot sed sudo texinfo thunderbird udisks2 ufw which wireless_tools xfce4-settings xorg-server xorg-xbacklight xorg-xinit youtube-dl zram-generator zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting xorg-fonts-encodings xorg-server-common xorg-setxkbmap xorg-xauth xorg-xkbcomp xorg-xmodmap xorg-xprop xorg-xrandr xorg-xrdb xorg-xset xorgproto
     else
         echo "L'utilisateur à abandonné l'installation."
         exit 1
@@ -22,11 +21,12 @@ packageInstall() {
 }
 #Active le firewall & Apparmor
 ufwActive() {
+    clear
     echo "Activation du pare-feu..."
     sudo systemctl start ufw.service
     sudo systemctl enable ufw.service
     sudo systemctl enable apparmor.service
-    sleep 2
+    sleep 5
 }
 #Propose de télécharger des utilitaires pour PC portable:
 pcPortable() {
@@ -38,23 +38,26 @@ pcPortable() {
 }
 #Change le shell:
 shellChange() {
+    clear
     echo "Changement du shell pour ZSH"
     chsh -s /usr/bin/zsh
-    sleep 2
+    sleep 5
 }
 #Installe l'AUR:
 aurInstall() {
+    clear
     echo "Installation de Yay (AUR)"
     sudo pacman -S --noconfirm --needed base-devel git
     git clone https://aur.archlinux.org/yay.git
-    mv yay .yay
-    cd .yay
+    cd yay
     makepkg -si
-    sleep 2
+    cd ..
+    sleep 5
 }
 #Installe les packages de l'AUR:
 aurPackage() {
-    yay -S python-sip4 sip4 termite update-grub
+    clear
+    yay -S --answerclean all --answerdiff none termite update-grub
 }
 #Choix navigateur web
 choixNavigateur() {
@@ -65,7 +68,7 @@ choixNavigateur() {
 
     case $CHOICE2 in
         1)
-            yay -S brave-bin
+            yay -S --answerclean all --answerdiff none brave-bin
             ;;
         2)
             sudo pacman -S --noconfirm --needed firefox
@@ -87,10 +90,10 @@ choixCode() {
 
     case $CHOICE3 in
         1)
-            yay -S visual-studio-code-bin
+            yay -S --answerclean all --answerdiff none visual-studio-code-bin
             ;;
         2)
-            yay -S vscodium-bin
+            yay -S --answerclean all --answerdiff none vscodium-bin
             ;;
         3)
             echo "Vous n'avez choisis aucun éditeur de code."
@@ -103,8 +106,25 @@ choixCode() {
 #Importe les fichiers de configuration et les places:
 importFichier() {
     echo "Import des fichiers de configuration: i3, termite, zsh, polybar."
-    wget -r kentrebaol.fr/kals/.config
-    curl -LO kentrebaol.fr/kals/.zshrc
+    curl -LO kentrebaol.fr/kalsfiles/.zshrc
+    curl -LO kentrebaol.fr/kalsfiles/i3config
+    curl -LO kentrebaol.fr/kalsfiles/polyconfig
+    curl -LO kentrebaol.fr/kalsfiles/termconfig
+    mkdir -p -v .config/i3
+    mkdir -v .config/termite
+    mkdir -v .config/polybar
+    mv -f -v i3config .config/i3/config
+    mv -f -v polyconfig .config/polybar/config.ini
+    mv -f -v termconfig .config/termite/config
+    sleep 5
+}
+#Création de .xinitrc
+creationXinit() {
+    clear
+    echo "Création du fichier Xinitrc"
+    touch .xinitrc
+    echo "setxkbmap fr\nexec i3" &> .xinitrc
+    sleep 5
 }
 #Message de fin:
 exitMessage() {
@@ -112,7 +132,7 @@ exitMessage() {
 }
 choixRedemarrage() {
     if (whiptail --title "Redémarrage" --yesno "Voulez-vous redémarrer maintenant ?" 10 80); then
-        sudo reboot 5
+        sudo reboot 10
     else
         echo "Vous n'avez pas redémarré."
     fi
@@ -129,5 +149,6 @@ aurPackage
 choixNavigateur
 choixCode
 importFichier
+creationXinit
 exitMessage
 choixRedemarrage
